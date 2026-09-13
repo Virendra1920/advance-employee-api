@@ -1,13 +1,14 @@
 const mongoose = require('mongoose');
+require('dotenv').config(); // Load environment variables from .env file
 
 const connectDB = async () => {
   try {
-    // Connects to local MongoDB (database name: companyDB)
-    await mongoose.connect('mongodb://127.0.0.1:27017/companyDB');
-    console.log('MongoDB Connection Successful!');
+    // Now it uses the secure cloud link from the .env file
+    await mongoose.connect(process.env.MONGO_URI);
+    console.log('☁️ Cloud MongoDB Connection Successful!');
   } catch (error) {
     console.error('MongoDB Connection Failed:', error.message);
-    process.exit(1); // Stop the server if database connection fails
+    process.exit(1);
   }
 };
 
