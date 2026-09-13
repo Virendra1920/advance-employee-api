@@ -3,18 +3,36 @@ const connectDB = require('./db');
 const Employee = require('./employeeModel');
 const { employeeSchema } = require('./validation');
 const { validateData } = require('./middleware');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 
 const app = express();
 app.use(express.json());
+// 1. Add Security Headers to hide backend architecture
+app.use(helmet());
+
+// 2. Prevent DDOS Attacks (Rate Limiting)
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes window
+  max: 100, // Limit each IP to 100 requests per 15 minutes
+  message: {
+    status: "Fail",
+    message: "Too many requests from this IP. Security system activated. Please try again after 15 minutes."
+  }
+});
+
+// Apply this strict security rule to all API routes
+app.use('/api/', apiLimiter);
 
 // Connect to MongoDB database
 connectDB();
 
+// ----------------------------------------------------
+// 1. POST API: Add New Employee (Your existing code)
+// ----------------------------------------------------
 app.post('/api/add-employee', validateData(employeeSchema), async (req, res) => {
   try {
-    // 1. Check if the email already exists in the database
     const existingUser = await Employee.findOne({ email: req.body.email });
-    
     if (existingUser) {
       return res.status(409).json({
         status: "Fail",
@@ -22,11 +40,9 @@ app.post('/api/add-employee', validateData(employeeSchema), async (req, res) => 
       });
     }
 
-    // 2. Create a new employee record and save it to MongoDB
     const newEmployee = new Employee(req.body);
     await newEmployee.save();
 
-    // 3. Send success response back to the client
     res.status(201).json({
       status: "Success",
       message: "Data successfully validated and permanently saved to database!",
@@ -34,15 +50,75 @@ app.post('/api/add-employee', validateData(employeeSchema), async (req, res) => 
     });
 
   } catch (error) {
-    // Catch any unexpected server/database errors
-    res.status(500).json({
-      status: "Fail",
-      message: "Internal Server Error",
-      error: error.message
-    });
+    res.status(500).json({ status: "Fail", message: "Internal Server Error", error: error.message });
   }
 });
 
+// ----------------------------------------------------
+// 2. GET API: Smart Search, Filtering & Pagination (NEW ADVANCED)
+// ----------------------------------------------------
+app.get('/api/employees', async (req, res) => {
+  try {
+    const { department, search, page = 1, limit = 5 } = req.query;
+    let query = {};
+
+    if (department) query.department = department;
+    if (search) query.name = { $regex: search, $options: "i" }; 
+
+    const skip = (page - 1) * limit;
+    
+    const employees = await Employee.find(query)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+      
+    const total = await Employee.countDocuments(query);
+
+    res.status(200).json({
+      status: "Success",
+      message: "Data fetched with advanced filters!",
+      currentPage: parseInt(page),
+      totalPages: Math.ceil(total / limit),
+      totalRecords: total,
+      data: employees
+    });
+
+  } catch (error) {
+    res.status(500).json({ status: "Fail", message: error.message });
+  }
+});
+
+// ----------------------------------------------------
+// 3. GET API: HR Analytics Dashboard (NEW ENTERPRISE FEATURE)
+// ----------------------------------------------------
+app.get('/api/employees/stats/hr-dashboard', async (req, res) => {
+  try {
+    const stats = await Employee.aggregate([
+      {
+        $group: {
+          _id: "$department",
+          totalEmployees: { $sum: 1 },
+          averageAge: { $avg: "$age" },
+          minAge: { $min: "$age" },
+          maxAge: { $max: "$age" }
+        }
+      },
+      { $sort: { totalEmployees: -1 } }
+    ]);
+
+    res.status(200).json({
+      status: "Success",
+      message: "HR Analytics generated successfully!",
+      totalDepartments: stats.length,
+      data: stats
+    });
+
+  } catch (error) {
+    res.status(500).json({ status: "Fail", message: error.message });
+  }
+});
+
+// Start the Server
 app.listen(3000, () => {
   console.log('Advanced API Server is running on http://localhost:3000');
 });
