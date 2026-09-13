@@ -118,7 +118,18 @@ app.get('/api/employees/stats/hr-dashboard', async (req, res) => {
   }
 });
 
-// Start the Server
-app.listen(3000, () => {
-  console.log('Advanced API Server is running on http://localhost:3000');
+// ----------------------------------------------------
+// 4. Default Route for Vercel (Homepage)
+// ----------------------------------------------------
+app.get('/', (req, res) => {
+  res.status(200).send("Welcome to Enterprise Employee API! The server is running perfectly on Vercel.");
 });
+
+// Start the Server (Local)
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Advanced API Server is running on port ${PORT}`);
+});
+
+// CRITICAL: Export the app for Vercel Serverless Function
+module.exports = app;
