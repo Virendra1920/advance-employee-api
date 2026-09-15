@@ -1,9 +1,9 @@
 /**
- * Fetches employee data from the REST API and renders it to the DOM.
+ * Enterprise Dashboard Controller
+ * Fetches employee data from REST API and renders it into a professional Data Table.
  */
 async function fetchAndRenderEmployees() {
-    const loadingElement = document.getElementById('loading');
-    const employeeListElement = document.getElementById('employee-list');
+    const tableBody = document.getElementById('employee-list');
 
     try {
         const response = await fetch('/api/employees');
@@ -14,35 +14,50 @@ async function fetchAndRenderEmployees() {
 
         const result = await response.json();
         
-        // Remove loading indicator
-        loadingElement.style.display = 'none';
-        
         // Handle empty database scenario
         if (!result.data || result.data.length === 0) {
-            employeeListElement.innerHTML = '<p class="error-state">No employee records found in the database.</p>';
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="4" class="state-message">
+                        No employee records found in the database.
+                    </td>
+                </tr>`;
             return;
         }
 
-        // Map data array to HTML strings
+        // Render data into table rows
         const htmlContent = result.data.map(emp => `
-            <article class="card">
-                <div class="name">
-                    🧑‍💼 ${emp.name} 
-                    <span class="tag">${emp.department}</span>
-                </div>
-                <div class="detail">📧 <b>Email:</b> ${emp.email}</div>
-                <div class="detail">📞 <b>Phone:</b> ${emp.phone}</div>
-                <div class="detail">🎂 <b>Age:</b> ${emp.age} Years</div>
-            </article>
+            <tr>
+                <td>
+                    <span class="emp-name">${emp.name}</span>
+                    <span class="emp-subtext">ID: ${emp._id.substring(0, 8)}...</span>
+                </td>
+                <td>
+                    <span class="emp-name">${emp.email}</span>
+                    <span class="emp-subtext">${emp.phone}</span>
+                </td>
+                <td>
+                    <span class="department-tag">${emp.department}</span>
+                </td>
+                <td>
+                    <span class="emp-name">${emp.age}</span>
+                    <span class="emp-subtext">Years</span>
+                </td>
+            </tr>
         `).join('');
 
-        employeeListElement.innerHTML = htmlContent;
+        tableBody.innerHTML = htmlContent;
 
     } catch (error) {
         console.error("Data Fetching Error:", error);
-        loadingElement.style.display = 'none';
-        employeeListElement.innerHTML = '<p class="error-state">❌ Failed to load data. Please check your connection and refresh the page.</p>';
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="4" class="state-message error-text">
+                    Failed to load data. Please check your connection or server status.
+                </td>
+            </tr>`;
     }
 }
 
+// Initialize application
 document.addEventListener('DOMContentLoaded', fetchAndRenderEmployees);

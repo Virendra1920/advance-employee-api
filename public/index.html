@@ -3,39 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HR Dashboard Pro - Enterprise API</title>
+    <title>Enterprise HR Portal</title>
+    <!-- Importing professional Inter font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #4f46e5; --bg: #f3f4f6; --card: #ffffff; --text: #1f2937; }
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 30px 20px; }
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg-color: #f8fafc;
+            --surface: #ffffff;
+            --border: #e2e8f0;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+        }
         
-        .header { text-align: center; margin-bottom: 40px; }
-        .header h1 { color: var(--primary); font-size: 2.5rem; margin-bottom: 5px; }
-        .header p { color: #6b7280; font-size: 1.1rem; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); -webkit-font-smoothing: antialiased; }
         
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 25px; max-width: 1100px; margin: 0 auto; }
-        .card { background: var(--card); padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border-top: 5px solid var(--primary); transition: all 0.3s ease; }
-        .card:hover { transform: translateY(-8px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.15); }
+        /* Premium Navbar */
+        .navbar { background-color: var(--surface); border-bottom: 1px solid var(--border); padding: 1rem 2.5rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
+        .navbar-brand { font-size: 1.125rem; font-weight: 700; display: flex; align-items: center; gap: 0.75rem; letter-spacing: -0.025em; }
+        .brand-icon { width: 24px; height: 24px; color: var(--primary); }
+        .btn-primary { background-color: var(--primary); color: white; border: none; padding: 0.625rem 1.25rem; border-radius: 6px; font-weight: 500; font-size: 0.875rem; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 0.5rem; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .btn-primary:hover { background-color: var(--primary-hover); }
+
+        /* Main Dashboard Area */
+        .container { max-width: 1100px; margin: 2.5rem auto; padding: 0 1.5rem; }
+        .page-header { margin-bottom: 2rem; }
+        .page-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.25rem; letter-spacing: -0.025em; }
+        .page-description { color: var(--text-muted); font-size: 0.875rem; }
+
+        /* Modern Data Table */
+        .table-card { background-color: var(--surface); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1); overflow: hidden; }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        thead { background-color: #f8fafc; border-bottom: 1px solid var(--border); }
+        th { padding: 0.875rem 1.5rem; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.05em; }
+        td { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); font-size: 0.875rem; vertical-align: middle; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover { background-color: #f1f5f9; }
+
+        /* Professional Typography inside Table */
+        .emp-name { font-weight: 600; color: var(--text-main); display: block; margin-bottom: 0.25rem; }
+        .emp-subtext { color: var(--text-muted); font-size: 0.8125rem; display: block; }
+        .department-tag { display: inline-flex; align-items: center; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; background-color: #e0e7ff; color: #3730a3; }
         
-        .name { font-size: 1.4rem; font-weight: bold; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
-        .tag { background: #e0e7ff; color: var(--primary); padding: 5px 15px; border-radius: 20px; font-size: 0.9rem; font-weight: 600; }
-        .detail { margin: 10px 0; color: #4b5563; font-size: 1rem; display: flex; align-items: center; gap: 10px; }
-        
-        .loading-state { text-align: center; font-size: 1.2rem; color: #6b7280; margin-top: 50px; font-weight: 500; }
-        .error-state { color: #dc2626; text-align: center; grid-column: 1/-1; font-weight: 500; font-size: 1.1rem; }
+        .state-message { padding: 3rem; text-align: center; color: var(--text-muted); font-weight: 500; font-size: 0.875rem; }
+        .error-text { color: #dc2626; }
     </style>
 </head>
 <body>
+    <!-- Top Navigation Bar -->
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <!-- Professional SVG Logo -->
+            <svg class="brand-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+            Enterprise API
+        </div>
+        <!-- Form button placeholder -->
+        <button class="btn-primary" id="open-form-btn">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+            Add Employee
+        </button>
+    </nav>
 
-    <header class="header">
-        <h1>🚀 HR Dashboard Pro</h1>
-        <p>Enterprise Employee Management System</p>
-    </header>
+    <!-- Main Dashboard Layout -->
+    <main class="container">
+        <header class="page-header">
+            <h1 class="page-title">Employee Directory</h1>
+            <p class="page-description">Manage your team members, departments, and contact information.</p>
+        </header>
 
-    <div id="loading" class="loading-state">Loading employee data securely... ⏳</div>
-    
-    <main id="employee-list" class="grid"></main>
+        <div class="table-card">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Employee Profile</th>
+                        <th>Contact Details</th>
+                        <th>Department</th>
+                        <th>Age</th>
+                    </tr>
+                </thead>
+                <tbody id="employee-list">
+                    <tr>
+                        <td colspan="4" class="state-message">
+                            Fetching secure data from server...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
 
-    <!-- JS is now safely imported from an external file -->
     <script src="/script.js"></script>
 </body>
 </html>
