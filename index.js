@@ -2,6 +2,14 @@ const express = require('express');
 const connectDB = require('./db');
 const Employee = require('./employeeModel');
 const { employeeSchema } = require('./validation');
+// Enterprise Level Validation for Update (Optional fields)
+const updateEmployeeSchema = z.object({
+  name: z.string().min(3, "Name is too short").optional(),
+  email: z.string().email("Invalid email").optional(),
+  phone: z.string().length(10, "Phone must be 10 digits").optional(),
+  age: z.number().min(18).max(65).optional(),
+  department: z.string().optional()
+});
 const { validateData } = require('./middleware');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
@@ -115,6 +123,75 @@ app.get('/api/employees/stats/hr-dashboard', async (req, res) => {
 
   } catch (error) {
     res.status(500).json({ status: "Fail", message: error.message });
+  }
+});
+
+// ----------------------------------------------------
+// 5. UPDATE Employee (PUT) - Senior Level Implementation
+// ----------------------------------------------------
+app.put('/api/update-employee/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Security Check 1: Check if ID is a valid MongoDB ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ status: "Error", message: "Invalid Employee ID format" });
+    }
+
+    // Security Check 2: Validate incoming data
+    const validation = updateEmployeeSchema.safeParse(req.body);
+    if (!validation.success) {
+      return res.status(400).json({ status: "Error", errors: validation.error.errors });
+    }
+
+    // Database Operation: Update only provided fields
+    const updatedEmployee = await Employee.findByIdAndUpdate(
+      id,
+      { $set: req.body }, 
+      { new: true, runValidators: true } // Return the updated document, not the old one
+    );
+
+    if (!updatedEmployee) {
+      return res.status(404).json({ status: "Error", message: "Employee not found in Database" });
+    }
+
+    res.status(200).json({
+      status: "Success",
+      message: "Employee updated successfully",
+      data: updatedEmployee
+    });
+  } catch (error) {
+    // Handle Duplicate Email error during update
+    if (error.code === 11000) {
+      return res.status(400).json({ status: "Error", message: "This Email already belongs to another employee" });
+    }
+    res.status(500).json({ status: "Error", message: "Internal Server Error" });
+  }
+});
+
+// ----------------------------------------------------
+// 6. DELETE Employee (DELETE) - Senior Level Implementation
+// ----------------------------------------------------
+app.delete('/api/delete-employee/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ status: "Error", message: "Invalid Employee ID format" });
+    }
+
+    const deletedEmployee = await Employee.findByIdAndDelete(id);
+
+    if (!deletedEmployee) {
+      return res.status(404).json({ status: "Error", message: "Employee not found in Database" });
+    }
+
+    res.status(200).json({
+      status: "Success",
+      message: `Record for ${deletedEmployee.name} has been permanently deleted.`
+    });
+  } catch (error) {
+    res.status(500).json({ status: "Error", message: "Internal Server Error" });
   }
 });
 
