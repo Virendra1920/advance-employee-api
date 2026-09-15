@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Documentation - Enterprise HR</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #4f46e5; --bg: #f8fafc; --surface: #ffffff; --border: #e2e8f0; --text: #0f172a; --text-muted: #64748b; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--bg); color: var(--text); line-height: 1.6; }
+        
+        .navbar { background-color: var(--surface); border-bottom: 1px solid var(--border); padding: 1rem 2.5rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10; }
+        .navbar-brand { font-size: 1.125rem; font-weight: 700; display: flex; align-items: center; gap: 0.75rem; }
+        .back-btn { color: var(--text-muted); text-decoration: none; font-weight: 500; transition: 0.2s; display: flex; align-items: center; gap: 0.5rem; }
+        .back-btn:hover { color: var(--primary); }
+
+        .container { max-width: 900px; margin: 3rem auto; padding: 0 1.5rem; }
+        .header { margin-bottom: 3rem; text-align: center; }
+        .header h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        .header p { color: var(--text-muted); font-size: 1.1rem; }
+
+        .endpoint-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 2rem; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .endpoint-header { display: flex; align-items: center; gap: 1rem; padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); background: #f8fafc; }
+        
+        .method { padding: 0.25rem 0.75rem; border-radius: 4px; font-weight: 700; font-size: 0.875rem; font-family: 'Fira Code', monospace; }
+        .method.get { background: #dbeafe; color: #1e3a8a; }
+        .method.post { background: #dcfce3; color: #14532d; }
+        .method.put { background: #fef3c7; color: #78350f; }
+        .method.delete { background: #fee2e2; color: #7f1d1d; }
+        
+        .url { font-family: 'Fira Code', monospace; font-size: 1rem; font-weight: 500; color: #334155; }
+        
+        .endpoint-body { padding: 1.5rem; }
+        .endpoint-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem; }
+        .endpoint-desc { color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.9rem; }
+        
+        .code-block { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 6px; font-family: 'Fira Code', monospace; font-size: 0.875rem; overflow-x: auto; margin-top: 0.5rem; }
+        .section-title { font-size: 0.875rem; font-weight: 600; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.5rem; }
+        
+        .auth-badge { display: inline-block; background: #fee2e2; color: #dc2626; font-size: 0.75rem; padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: 600; margin-left: auto; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" color="#4f46e5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+            API Reference
+        </div>
+        <a href="/" class="back-btn">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+            Back to Dashboard
+        </a>
+    </nav>
+
+    <div class="container">
+        <div class="header">
+            <h1>REST API Documentation</h1>
+            <p>Complete guide to integrate and consume the Enterprise Employee API.</p>
+        </div>
+
+        <!-- Auth Endpoint -->
+        <div class="endpoint-card">
+            <div class="endpoint-header">
+                <span class="method post">POST</span>
+                <span class="url">/api/admin/login</span>
+            </div>
+            <div class="endpoint-body">
+                <div class="endpoint-title">Admin Authentication</div>
+                <div class="endpoint-desc">Generates a JWT token required for protected routes.</div>
+                <div class="section-title">Request Body (JSON)</div>
+                <div class="code-block">
+{
+  "email": "virendra@admin.com",
+  "password": "adminpassword"
+}
+                </div>
+            </div>
+        </div>
+
+        <!-- Get Employees Endpoint -->
+        <div class="endpoint-card">
+            <div class="endpoint-header">
+                <span class="method get">GET</span>
+                <span class="url">/api/employees</span>
+            </div>
+            <div class="endpoint-body">
+                <div class="endpoint-title">Fetch All Employees</div>
+                <div class="endpoint-desc">Retrieves a complete list of employee records.</div>
+                <div class="section-title">Success Response</div>
+                <div class="code-block">
+{
+  "success": true,
+  "count": 50,
+  "data": [
+    { "_id": "64f1...", "name": "Kundan", "department": "IT" }
+  ]
+}
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Employee Endpoint -->
+        <div class="endpoint-card">
+            <div class="endpoint-header">
+                <span class="method post">POST</span>
+                <span class="url">/api/add-employee</span>
+                <span class="auth-badge">🔒 Requires JWT</span>
+            </div>
+            <div class="endpoint-body">
+                <div class="endpoint-title">Create New Record</div>
+                <div class="endpoint-desc">Adds a new employee to the database. Strictly validated using Zod.</div>
+                <div class="section-title">Request Body</div>
+                <div class="code-block">
+{
+  "name": "Rahul Sharma",
+  "email": "rahul@example.com",
+  "phone": "9876543210",
+  "age": 30,
+  "department": "HR"
+}
+                </div>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>
