@@ -1,42 +1,43 @@
 # 🚀 Enterprise Employee Management API
 
-A production-ready RESTful API built to handle employee data securely and efficiently. This project demonstrates advanced backend architecture, MongoDB aggregation, strict data validation, and robust security measures.
+A production-ready RESTful API built to handle employee data securely and efficiently. This project demonstrates advanced backend architecture, MongoDB aggregation, strict data validation, JWT authentication, and robust security measures.
 
 ## ✨ Enterprise Features
-- **HR Analytics Dashboard:** Uses MongoDB Aggregation Pipeline to generate real-time stats (employee count, average age, etc.) grouped by departments.
-- **Smart Search & Pagination:** Optimized data fetching using limit, skip, and regex-based search for scalable performance.
-- **Advanced Security:** 
-  - `Helmet.js` to secure HTTP headers and hide backend tech stack.
-  - `Express Rate Limit` to protect against DDoS attacks and brute force.
+- **Full CRUD Operations:** Create, Read, Update, and Delete employee records seamlessly.
+- **JWT Authentication:** Highly secure admin login system with token-based route protection.
+- **Advanced Security:** `Helmet.js` for secure headers and `Express Rate Limit` to prevent DDoS attacks.
+- **HR Analytics Dashboard:** Uses MongoDB Aggregation Pipeline for real-time department stats.
 - **Strict Data Validation:** Utilizes `Zod` to catch invalid data before database interaction.
-- **Duplicate Prevention:** Automatically blocks duplicate email entries.
+- **Serverless Deployment:** Fully deployed and running smoothly on **Vercel**.
 
 ## 🛠️ Tech Stack
-- **Runtime:** Node.js
-- **Framework:** Express.js
-- **Database:** MongoDB & Mongoose
-- **Security:** Helmet, Express-Rate-Limit
+- **Backend:** Node.js, Express.js
+- **Database:** MongoDB Atlas & Mongoose
+- **Security:** JSON Web Tokens (JWT), Helmet, Express-Rate-Limit
 - **Validation:** Zod
+- **Deployment:** Vercel
+
+## 🔗 Live Demo
+**Base URL:** `https://advance-employee-api.vercel.app` *(API is currently live)*
 
 ## 🚀 Core API Endpoints
 
-### 1. HR Analytics Dashboard (Aggregation)
-- **URL:** `/api/employees/stats/hr-dashboard`
-- **Method:** `GET`
-- **Description:** Returns statistical data grouped by department.
+### 🔐 Auth & Security
+| Method | Endpoint | Description | Access |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/api/admin/login` | Admin login to generate JWT Token | Public |
 
-### 2. Get Employees (With Pagination & Search)
-- **URL:** `/api/employees?department=IT&page=1&limit=5`
-- **Method:** `GET`
-- **Description:** Returns a paginated list of employees. Supports filtering by department and searching by name.
-
-### 3. Add New Employee
-- **URL:** `/api/add-employee`
-- **Method:** `POST`
-- **Body (JSON):** Requires name, email, phone, age, and department.
+### 👥 Employee Management
+| Method | Endpoint | Description | Access |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/employees` | Fetch all employees (Pagination & Search) | Public |
+| `GET` | `/api/employees/stats/hr-dashboard` | Get department-wise stats | Public |
+| `POST` | `/api/add-employee` | Add a new employee | **Protected** (Requires Token) |
+| `PUT` | `/api/update-employee/:id` | Update existing employee | **Protected** (Requires Token) |
+| `DELETE` | `/api/delete-employee/:id` | Remove an employee | **Protected** (Requires Token) |
 
 ## 💻 How to Run Locally
-1. Clone this repository: `git clone <your-repo-link>`
+1. Clone this repository.
 2. Install dependencies: `npm install`
-3. Ensure MongoDB is running locally (`mongodb://127.0.0.1:27017/`).
+3. Create a `.env` file and add your `MONGO_URI` and `JWT_SECRET`.
 4. Start the server: `node index.js`
