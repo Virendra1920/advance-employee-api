@@ -4,73 +4,59 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Enterprise HR Portal</title>
-    <!-- Importing professional Inter font -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary: #4f46e5;
-            --primary-hover: #4338ca;
-            --bg-color: #f8fafc;
-            --surface: #ffffff;
-            --border: #e2e8f0;
-            --text-main: #0f172a;
-            --text-muted: #64748b;
-        }
-        
+        :root { --primary: #4f46e5; --primary-hover: #4338ca; --bg-color: #f8fafc; --surface: #ffffff; --border: #e2e8f0; --text-main: #0f172a; --text-muted: #64748b; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         body { background-color: var(--bg-color); color: var(--text-main); -webkit-font-smoothing: antialiased; }
         
-        /* Premium Navbar */
-        .navbar { background-color: var(--surface); border-bottom: 1px solid var(--border); padding: 1rem 2.5rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
-        .navbar-brand { font-size: 1.125rem; font-weight: 700; display: flex; align-items: center; gap: 0.75rem; letter-spacing: -0.025em; }
+        .navbar { background-color: var(--surface); border-bottom: 1px solid var(--border); padding: 1rem 2.5rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10; }
+        .navbar-brand { font-size: 1.125rem; font-weight: 700; display: flex; align-items: center; gap: 0.75rem; }
         .brand-icon { width: 24px; height: 24px; color: var(--primary); }
-        .btn-primary { background-color: var(--primary); color: white; border: none; padding: 0.625rem 1.25rem; border-radius: 6px; font-weight: 500; font-size: 0.875rem; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 0.5rem; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .btn-primary { background-color: var(--primary); color: white; border: none; padding: 0.625rem 1.25rem; border-radius: 6px; font-weight: 500; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 0.5rem; }
         .btn-primary:hover { background-color: var(--primary-hover); }
 
-        /* Main Dashboard Area */
         .container { max-width: 1100px; margin: 2.5rem auto; padding: 0 1.5rem; }
         .page-header { margin-bottom: 2rem; }
-        .page-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.25rem; letter-spacing: -0.025em; }
+        .page-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.25rem; }
         .page-description { color: var(--text-muted); font-size: 0.875rem; }
 
-        /* Modern Data Table */
-        .table-card { background-color: var(--surface); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1); overflow: hidden; }
+        .table-card { background-color: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
         table { width: 100%; border-collapse: collapse; text-align: left; }
         thead { background-color: #f8fafc; border-bottom: 1px solid var(--border); }
-        th { padding: 0.875rem 1.5rem; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.05em; }
-        td { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); font-size: 0.875rem; vertical-align: middle; }
-        tr:last-child td { border-bottom: none; }
-        tr:hover { background-color: #f1f5f9; }
-
-        /* Professional Typography inside Table */
-        .emp-name { font-weight: 600; color: var(--text-main); display: block; margin-bottom: 0.25rem; }
-        .emp-subtext { color: var(--text-muted); font-size: 0.8125rem; display: block; }
-        .department-tag { display: inline-flex; align-items: center; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; background-color: #e0e7ff; color: #3730a3; }
+        th { padding: 0.875rem 1.5rem; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: var(--text-muted); }
+        td { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); font-size: 0.875rem; }
         
-        .state-message { padding: 3rem; text-align: center; color: var(--text-muted); font-weight: 500; font-size: 0.875rem; }
-        .error-text { color: #dc2626; }
+        .emp-name { font-weight: 600; color: var(--text-main); display: block; }
+        .emp-subtext { color: var(--text-muted); font-size: 0.8125rem; }
+        .department-tag { display: inline-flex; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; background-color: #e0e7ff; color: #3730a3; }
+        .state-message { padding: 3rem; text-align: center; color: var(--text-muted); }
+
+        /* Modal Styles for Forms */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); display: none; justify-content: center; align-items: center; z-index: 50; backdrop-filter: blur(4px); }
+        .modal-content { background: var(--surface); padding: 2rem; border-radius: 12px; width: 100%; max-width: 400px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+        .close-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-muted); }
+        .form-input { width: 100%; padding: 0.75rem; margin-bottom: 1rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.875rem; outline: none; }
+        .form-input:focus { border-color: var(--primary); }
     </style>
 </head>
 <body>
-    <!-- Top Navigation Bar -->
     <nav class="navbar">
         <div class="navbar-brand">
-            <!-- Professional SVG Logo -->
             <svg class="brand-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
             Enterprise API
         </div>
-        <!-- Form button placeholder -->
-        <button class="btn-primary" id="open-form-btn">
+        <button class="btn-primary" id="open-modal-btn">
             <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
             Add Employee
         </button>
     </nav>
 
-    <!-- Main Dashboard Layout -->
     <main class="container">
         <header class="page-header">
             <h1 class="page-title">Employee Directory</h1>
-            <p class="page-description">Manage your team members, departments, and contact information.</p>
+            <p class="page-description">Manage your team members securely.</p>
         </header>
 
         <div class="table-card">
@@ -84,15 +70,39 @@
                     </tr>
                 </thead>
                 <tbody id="employee-list">
-                    <tr>
-                        <td colspan="4" class="state-message">
-                            Fetching secure data from server...
-                        </td>
-                    </tr>
+                    <tr><td colspan="4" class="state-message">Fetching secure data...</td></tr>
                 </tbody>
             </table>
         </div>
     </main>
+
+    <!-- Unified Modal for Login & Add Employee -->
+    <div id="modal-overlay" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title" style="font-size: 1.25rem;">Admin Access</h2>
+                <button id="close-modal-btn" class="close-btn">&times;</button>
+            </div>
+            
+            <!-- Login Form -->
+            <form id="login-form">
+                <input type="email" id="login-email" class="form-input" placeholder="Admin Email (virendra@admin.com)" required>
+                <input type="password" id="login-password" class="form-input" placeholder="Password (admin123)" required>
+                <button type="submit" class="btn-primary" style="width: 100%; justify-content: center;">Authenticate</button>
+                <p id="login-error" style="color: #dc2626; font-size: 0.8rem; margin-top: 10px; display: none;">Invalid credentials.</p>
+            </form>
+
+            <!-- Add Employee Form -->
+            <form id="add-employee-form" style="display: none;">
+                <input type="text" id="emp-name" class="form-input" placeholder="Full Name" required>
+                <input type="email" id="emp-email" class="form-input" placeholder="Work Email" required>
+                <input type="text" id="emp-phone" class="form-input" placeholder="Phone Number" required>
+                <input type="number" id="emp-age" class="form-input" placeholder="Age" required>
+                <input type="text" id="emp-dept" class="form-input" placeholder="Department (e.g., IT, Sales)" required>
+                <button type="submit" class="btn-primary" style="width: 100%; justify-content: center;">Save Record</button>
+            </form>
+        </div>
+    </div>
 
     <script src="/script.js"></script>
 </body>
