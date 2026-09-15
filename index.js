@@ -1,4 +1,5 @@
 const express = require('express');
+const jwt = require('jsonwebtoken');
 const { z } = require('zod');
 const mongoose = require('mongoose'); //
 const connectDB = require('./db');
@@ -37,10 +38,45 @@ app.use('/api/', apiLimiter);
 // Connect to MongoDB database
 connectDB();
 
+// ====================================================
+// JWT SECURITY & MIDDLEWARE
+// ====================================================
+
+// 1. Admin Login Route (To generate Token)
+app.post('/api/admin/login', (req, res) => {
+  const { email, password } = req.body;
+  
+  // Portfolio के लिए हम एक फिक्स एडमिन ईमेल/पासवर्ड रख रहे हैं
+  if (email === "virendra@admin.com" && password === "admin123") {
+    // अगर ईमेल/पासवर्ड सही है, तो एक सीक्रेट टोकन बनाएँ (जो 1 घंटे तक चलेगा)
+    const token = jwt.sign({ role: "admin" }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    return res.status(200).json({ status: "Success", message: "Login successful!", token: token });
+  }
+  return res.status(401).json({ status: "Error", message: "Invalid Email or Password" });
+});
+
+// 2. Security Middleware (दरवाज़े का गार्ड)
+const verifyToken = (req, res, next) => {
+  // हेडर से टोकन निकालें (Format: "Bearer <token>")
+  const authHeader = req.headers['authorization'];
+  if (!authHeader) {
+    return res.status(403).json({ status: "Error", message: "Access Denied! No token provided." });
+  }
+
+  try {
+    const token = authHeader.split(" ")[1]; // "Bearer " को हटाकर सिर्फ असली टोकन निकालें
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded; // सब सही है, तो आगे जाने दें
+    next();
+  } catch (err) {
+    return res.status(401).json({ status: "Error", message: "Invalid or Expired Token!" });
+  }
+};
+
 // ----------------------------------------------------
 // 1. POST API: Add New Employee (Your existing code)
 // ----------------------------------------------------
-app.post('/api/add-employee', validateData(employeeSchema), async (req, res) => {
+app.post('/api/add-employee', verifyToken, validateData(employeeSchema), async (req, res) => {
   try {
     const existingUser = await Employee.findOne({ email: req.body.email });
     if (existingUser) {
@@ -131,7 +167,7 @@ app.get('/api/employees/stats/hr-dashboard', async (req, res) => {
 // ----------------------------------------------------
 // 5. UPDATE Employee (PUT) - Senior Level Implementation
 // ----------------------------------------------------
-app.put('/api/update-employee/:id', async (req, res) => {
+app.put('/api/update-employee/:id', verifyToken, async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -174,7 +210,7 @@ app.put('/api/update-employee/:id', async (req, res) => {
 // ----------------------------------------------------
 // 6. DELETE Employee (DELETE) - Senior Level Implementation
 // ----------------------------------------------------
-app.delete('/api/delete-employee/:id', async (req, res) => {
+app.delete('/api/delete-employee/:id', verifyToken, async (req, res) => {
   try {
     const { id } = req.params;
 
