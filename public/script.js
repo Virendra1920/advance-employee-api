@@ -17,6 +17,7 @@ async function fetchAndRenderEmployees() {
             return;
         }
 
+        // We use data-* attributes here instead of inline onclick for strict security
         tableBody.innerHTML = result.data.map(emp => `
             <tr>
                 <td>
@@ -33,10 +34,12 @@ async function fetchAndRenderEmployees() {
                     <span class="emp-subtext">Years</span>
                 </td>
                 <td class="actions-cell">
-                    <button onclick="editEmployee('${emp._id}', '${emp.name}', '${emp.email}', '${emp.phone}', '${emp.age}', '${emp.department}')" class="btn-icon" title="Edit Record">
+                    <button class="btn-icon edit-btn" title="Edit Record" 
+                        data-id="${emp._id}" data-name="${emp.name}" data-email="${emp.email}" 
+                        data-phone="${emp.phone}" data-age="${emp.age}" data-dept="${emp.department}">
                         <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                     </button>
-                    <button onclick="deleteEmployee('${emp._id}')" class="btn-icon delete" title="Delete Record">
+                    <button class="btn-icon delete-btn" title="Delete Record" data-id="${emp._id}">
                         <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                     </button>
                 </td>
@@ -47,7 +50,56 @@ async function fetchAndRenderEmployees() {
     }
 }
 
-// Check Token & Show Modal
+// Global Event Delegation for Edit & Delete buttons (Bypasses CSP limits safely)
+tableBody.addEventListener('click', async (e) => {
+    // Check if Edit button was clicked
+    const editBtn = e.target.closest('.edit-btn');
+    if (editBtn) {
+        if (!localStorage.getItem('adminToken')) {
+            alert("Please login first by clicking 'Add Employee'");
+            return;
+        }
+        modalOverlay.style.display = 'flex';
+        showEmployeeForm("Update Employee Data", "Update Record");
+        
+        document.getElementById('edit-emp-id').value = editBtn.dataset.id;
+        document.getElementById('emp-name').value = editBtn.dataset.name;
+        document.getElementById('emp-email').value = editBtn.dataset.email;
+        document.getElementById('emp-phone').value = editBtn.dataset.phone;
+        document.getElementById('emp-age').value = editBtn.dataset.age;
+        document.getElementById('emp-dept').value = editBtn.dataset.dept;
+    }
+
+    // Check if Delete button was clicked
+    const deleteBtn = e.target.closest('.delete-btn');
+    if (deleteBtn) {
+        const token = localStorage.getItem('adminToken');
+        if (!token) {
+            alert("Admin Access Required. Please login first.");
+            return;
+        }
+        
+        const id = deleteBtn.dataset.id;
+        if (confirm("Are you sure you want to permanently delete this record?")) {
+            try {
+                const response = await fetch(`/api/delete-employee/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    fetchAndRenderEmployees(); // Refresh table instantly
+                } else {
+                    alert("Session expired or unauthorized.");
+                }
+            } catch (error) {
+                console.error("Delete error", error);
+            }
+        }
+    }
+});
+
+// Modal UI Logic
 document.getElementById('open-modal-btn').addEventListener('click', () => {
     modalOverlay.style.display = 'flex';
     employeeForm.reset();
@@ -116,7 +168,6 @@ employeeForm.addEventListener('submit', async (e) => {
         department: document.getElementById('emp-dept').value
     };
 
-    // If empId exists, it's an UPDATE, else it's a CREATE
     const endpoint = empId ? `/api/update-employee/${empId}` : '/api/add-employee';
     const method = empId ? 'PUT' : 'POST';
 
@@ -132,62 +183,14 @@ employeeForm.addEventListener('submit', async (e) => {
 
         if (response.ok) {
             modalOverlay.style.display = 'none';
-            fetchAndRenderEmployees(); // Instant reload table
-        } else if (response.status === 401 || response.status === 403) {
-            alert("Session expired. Please login again.");
-            localStorage.removeItem('adminToken');
-            showLoginForm();
+            fetchAndRenderEmployees(); // Refresh table
         } else {
-            alert("Operation failed. Email might already exist.");
+            alert("Operation failed. Check if email already exists or session expired.");
         }
     } catch (error) {
         console.error("Submission error", error);
     }
 });
 
-// Edit Button Logic
-window.editEmployee = function(id, name, email, phone, age, dept) {
-    if (!localStorage.getItem('adminToken')) {
-        alert("Please login first by clicking 'Add Employee'");
-        return;
-    }
-    modalOverlay.style.display = 'flex';
-    showEmployeeForm("Update Employee Data", "Update Record");
-    
-    // Fill the form with existing data
-    document.getElementById('edit-emp-id').value = id;
-    document.getElementById('emp-name').value = name;
-    document.getElementById('emp-email').value = email;
-    document.getElementById('emp-phone').value = phone;
-    document.getElementById('emp-age').value = age;
-    document.getElementById('emp-dept').value = dept;
-}
-
-// Delete Button Logic
-window.deleteEmployee = async function(id) {
-    const token = localStorage.getItem('adminToken');
-    if (!token) {
-        alert("Admin Access Required. Please login first.");
-        return;
-    }
-
-    if (confirm("Are you sure you want to permanently delete this record?")) {
-        try {
-            const response = await fetch(`/api/delete-employee/${id}`, {
-                method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-
-            if (response.ok) {
-                fetchAndRenderEmployees(); // Instant reload table
-            } else {
-                alert("Session expired or unauthorized.");
-            }
-        } catch (error) {
-            console.error("Delete error", error);
-        }
-    }
-}
-
-// Initialize
+// Initialize Table on Page Load
 document.addEventListener('DOMContentLoaded', fetchAndRenderEmployees);
