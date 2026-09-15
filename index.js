@@ -239,6 +239,10 @@ app.delete('/api/delete-employee/:id', verifyToken, async (req, res) => {
 // ----------------------------------------------------
 // Serve the Frontend UI
 app.use(express.static(path.join(__dirname, 'public')));
+// Serve API Documentation Page explicitly
+app.get('/docs.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'docs.html'));
+});
 
 // Start the Server (Local)
 const PORT = process.env.PORT || 3000;

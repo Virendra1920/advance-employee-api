@@ -71,19 +71,21 @@
 
     <main class="container">
         <header class="page-header">
-            <a href="/docs.html" class="btn-primary" style="text-decoration: none; background-color: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; margin-right: 10px;">
-    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
-    API Docs
-</a>
             <div>
                 <h1 class="page-title">Employee Directory</h1>
                 <p class="page-description">Manage your team members securely.</p>
             </div>
-            <!-- Export Data Button -->
-            <button class="btn-success" id="export-btn" title="Download as CSV">
-                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                Export CSV
-            </button>
+            <!-- Buttons grouped perfectly -->
+            <div style="display: flex; gap: 10px;">
+                <a href="/docs.html" class="btn-primary" style="text-decoration: none; background-color: #f1f5f9; color: #475569; border: 1px solid #cbd5e1;">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                    API Docs
+                </a>
+                <button class="btn-success" id="export-btn" title="Download as CSV">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    Export CSV
+                </button>
+            </div>
         </header>
 
         <!-- Advanced Search and Filter -->
@@ -119,7 +121,6 @@
 
     <!-- Modal Form -->
     <div id="modal-overlay" class="modal-overlay">
-        <!-- Form remains exactly the same as before -->
         <div class="modal-content">
             <div class="modal-header">
                 <h2 id="modal-title" style="font-size: 1.25rem;">Admin Access</h2>
@@ -144,7 +145,6 @@
         </div>
     </div>
 
-    <!-- CACHE BUSTING: Updated version to ?v=4 to force load new JS -->
     <script src="/script.js?v=4"></script>
 </body>
 </html>
