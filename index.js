@@ -1,4 +1,6 @@
 const express = require('express');
+const { z } = require('zod');
+const mongoose = require('mongoose'); //
 const connectDB = require('./db');
 const Employee = require('./employeeModel');
 const { employeeSchema } = require('./validation');
