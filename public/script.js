@@ -6,53 +6,119 @@ const employeeForm = document.getElementById('employee-form');
 const modalTitle = document.getElementById('modal-title');
 const submitBtn = document.getElementById('submit-btn');
 
-// Fetch and Render Table Data
+// New Elements for Search & Export
+const searchInput = document.getElementById('search-input');
+const filterDept = document.getElementById('filter-dept');
+const exportBtn = document.getElementById('export-btn');
+
+// Global Array to store fetched data for fast searching
+let allEmployees = [];
+
+// Fetch Data from Server
 async function fetchAndRenderEmployees() {
     try {
         const response = await fetch('/api/employees');
         const result = await response.json();
         
-        if (!result.data || result.data.length === 0) {
-            tableBody.innerHTML = `<tr><td colspan="5" class="state-message">No employee records found.</td></tr>`;
-            return;
+        if (result.data) {
+            allEmployees = result.data; // Store data globally
+            renderTable(allEmployees);  // Display data
+        } else {
+            renderTable([]);
         }
-
-        // We use data-* attributes here instead of inline onclick for strict security
-        tableBody.innerHTML = result.data.map(emp => `
-            <tr>
-                <td>
-                    <span class="emp-name">${emp.name}</span>
-                    <span class="emp-subtext">ID: ${emp._id.substring(0, 8)}</span>
-                </td>
-                <td>
-                    <span class="emp-name">${emp.email}</span>
-                    <span class="emp-subtext">${emp.phone}</span>
-                </td>
-                <td><span class="department-tag">${emp.department}</span></td>
-                <td>
-                    <span class="emp-name">${emp.age}</span>
-                    <span class="emp-subtext">Years</span>
-                </td>
-                <td class="actions-cell">
-                    <button class="btn-icon edit-btn" title="Edit Record" 
-                        data-id="${emp._id}" data-name="${emp.name}" data-email="${emp.email}" 
-                        data-phone="${emp.phone}" data-age="${emp.age}" data-dept="${emp.department}">
-                        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                    </button>
-                    <button class="btn-icon delete-btn" title="Delete Record" data-id="${emp._id}">
-                        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                    </button>
-                </td>
-            </tr>
-        `).join('');
     } catch (error) {
-        tableBody.innerHTML = `<tr><td colspan="5" class="state-message" style="color:red;">Failed to load data.</td></tr>`;
+        tableBody.innerHTML = `<tr><td colspan="5" class="state-message" style="color:red;">Failed to load data from Server.</td></tr>`;
     }
 }
 
-// Global Event Delegation for Edit & Delete buttons (Bypasses CSP limits safely)
+// Render Table Function
+function renderTable(data) {
+    if (data.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="5" class="state-message">No matching employee records found.</td></tr>`;
+        return;
+    }
+
+    tableBody.innerHTML = data.map(emp => `
+        <tr>
+            <td>
+                <span class="emp-name">${emp.name}</span>
+                <span class="emp-subtext">ID: ${emp._id.substring(0, 8)}</span>
+            </td>
+            <td>
+                <span class="emp-name">${emp.email}</span>
+                <span class="emp-subtext">${emp.phone}</span>
+            </td>
+            <td><span class="department-tag">${emp.department}</span></td>
+            <td>
+                <span class="emp-name">${emp.age}</span>
+                <span class="emp-subtext">Years</span>
+            </td>
+            <td class="actions-cell">
+                <button class="btn-icon edit-btn" title="Edit Record" 
+                    data-id="${emp._id}" data-name="${emp.name}" data-email="${emp.email}" 
+                    data-phone="${emp.phone}" data-age="${emp.age}" data-dept="${emp.department}">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                </button>
+                <button class="btn-icon delete-btn" title="Delete Record" data-id="${emp._id}">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                </button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+// --- NEW FEATURE 1: Live Search & Filter Logic ---
+function handleSearchAndFilter() {
+    const searchTerm = searchInput.value.toLowerCase();
+    const selectedDept = filterDept.value;
+
+    const filteredData = allEmployees.filter(emp => {
+        const matchesNameOrEmail = emp.name.toLowerCase().includes(searchTerm) || emp.email.toLowerCase().includes(searchTerm);
+        const matchesDept = selectedDept === 'All' || emp.department.toLowerCase() === selectedDept.toLowerCase();
+        
+        return matchesNameOrEmail && matchesDept;
+    });
+
+    renderTable(filteredData);
+}
+
+// Attach Event Listeners to Search and Dropdown
+searchInput.addEventListener('input', handleSearchAndFilter);
+filterDept.addEventListener('change', handleSearchAndFilter);
+
+// --- NEW FEATURE 2: Export to CSV (Excel) ---
+exportBtn.addEventListener('click', () => {
+    if (allEmployees.length === 0) {
+        alert("No data available to export!");
+        return;
+    }
+
+    // 1. Create CSV Headers
+    const headers = ["Employee ID", "Full Name", "Email Address", "Phone Number", "Age", "Department"];
+    const csvRows = [headers.join(",")];
+
+    // 2. Add Data Rows
+    allEmployees.forEach(emp => {
+        const row = [emp._id, emp.name, emp.email, emp.phone, emp.age, emp.department];
+        csvRows.push(row.join(","));
+    });
+
+    // 3. Create a Blob (File) and Download it
+    const blob = new Blob([csvRows.join("\n")], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const downloadLink = document.createElement("a");
+    
+    downloadLink.setAttribute("hidden", "");
+    downloadLink.setAttribute("href", url);
+    downloadLink.setAttribute("download", "Enterprise_Employee_Report.csv");
+    
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+});
+
+// Event Delegation for Edit & Delete buttons (Remains exactly the same)
 tableBody.addEventListener('click', async (e) => {
-    // Check if Edit button was clicked
     const editBtn = e.target.closest('.edit-btn');
     if (editBtn) {
         if (!localStorage.getItem('adminToken')) {
@@ -70,7 +136,6 @@ tableBody.addEventListener('click', async (e) => {
         document.getElementById('emp-dept').value = editBtn.dataset.dept;
     }
 
-    // Check if Delete button was clicked
     const deleteBtn = e.target.closest('.delete-btn');
     if (deleteBtn) {
         const token = localStorage.getItem('adminToken');
@@ -87,34 +152,24 @@ tableBody.addEventListener('click', async (e) => {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
 
-                if (response.ok) {
-                    fetchAndRenderEmployees(); // Refresh table instantly
-                } else {
-                    alert("Session expired or unauthorized.");
-                }
-            } catch (error) {
-                console.error("Delete error", error);
-            }
+                if (response.ok) fetchAndRenderEmployees();
+                else alert("Session expired or unauthorized.");
+            } catch (error) { console.error("Delete error", error); }
         }
     }
 });
 
-// Modal UI Logic
+// Form and Auth Modal Handlers (Remains exactly the same)
 document.getElementById('open-modal-btn').addEventListener('click', () => {
     modalOverlay.style.display = 'flex';
     employeeForm.reset();
     document.getElementById('edit-emp-id').value = '';
     
-    if (localStorage.getItem('adminToken')) {
-        showEmployeeForm("Add New Employee", "Save Record");
-    } else {
-        showLoginForm();
-    }
+    if (localStorage.getItem('adminToken')) showEmployeeForm("Add New Employee", "Save Record");
+    else showLoginForm();
 });
 
-document.getElementById('close-modal-btn').addEventListener('click', () => {
-    modalOverlay.style.display = 'none';
-});
+document.getElementById('close-modal-btn').addEventListener('click', () => modalOverlay.style.display = 'none');
 
 function showLoginForm() {
     loginForm.style.display = 'block';
@@ -129,7 +184,6 @@ function showEmployeeForm(title, btnText) {
     submitBtn.innerText = btnText;
 }
 
-// Handle Login
 loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const email = document.getElementById('login-email').value;
@@ -146,15 +200,10 @@ loginForm.addEventListener('submit', async (e) => {
         if (response.ok && data.token) {
             localStorage.setItem('adminToken', data.token);
             showEmployeeForm("Add New Employee", "Save Record");
-        } else {
-            alert(data.message || 'Invalid credentials');
-        }
-    } catch (error) {
-        console.error("Login Error", error);
-    }
+        } else alert(data.message || 'Invalid credentials');
+    } catch (error) { console.error("Login Error", error); }
 });
 
-// Create or Update Employee
 employeeForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const token = localStorage.getItem('adminToken');
@@ -174,23 +223,16 @@ employeeForm.addEventListener('submit', async (e) => {
     try {
         const response = await fetch(endpoint, {
             method: method,
-            headers: { 
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}` 
-            },
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             body: JSON.stringify(payload)
         });
 
         if (response.ok) {
             modalOverlay.style.display = 'none';
-            fetchAndRenderEmployees(); // Refresh table
-        } else {
-            alert("Operation failed. Check if email already exists or session expired.");
-        }
-    } catch (error) {
-        console.error("Submission error", error);
-    }
+            fetchAndRenderEmployees();
+        } else alert("Operation failed. Check if email already exists or session expired.");
+    } catch (error) { console.error("Submission error", error); }
 });
 
-// Initialize Table on Page Load
+// Initialize App
 document.addEventListener('DOMContentLoaded', fetchAndRenderEmployees);

@@ -6,20 +6,30 @@
     <title>Enterprise HR Portal</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #4f46e5; --primary-hover: #4338ca; --bg-color: #f8fafc; --surface: #ffffff; --border: #e2e8f0; --text-main: #0f172a; --text-muted: #64748b; --danger: #dc2626; --danger-hover: #b91c1c; }
+        :root { --primary: #4f46e5; --primary-hover: #4338ca; --bg-color: #f8fafc; --surface: #ffffff; --border: #e2e8f0; --text-main: #0f172a; --text-muted: #64748b; --danger: #dc2626; --success: #10b981; --success-hover: #059669; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         body { background-color: var(--bg-color); color: var(--text-main); -webkit-font-smoothing: antialiased; }
         
         .navbar { background-color: var(--surface); border-bottom: 1px solid var(--border); padding: 1rem 2.5rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
         .navbar-brand { font-size: 1.125rem; font-weight: 700; display: flex; align-items: center; gap: 0.75rem; }
         .brand-icon { width: 24px; height: 24px; color: var(--primary); }
+        
         .btn-primary { background-color: var(--primary); color: white; border: none; padding: 0.625rem 1.25rem; border-radius: 6px; font-weight: 500; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 0.5rem; }
         .btn-primary:hover { background-color: var(--primary-hover); }
+        
+        .btn-success { background-color: var(--success); color: white; border: none; padding: 0.625rem 1.25rem; border-radius: 6px; font-weight: 500; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 0.5rem; }
+        .btn-success:hover { background-color: var(--success-hover); }
 
         .container { max-width: 1100px; margin: 2.5rem auto; padding: 0 1.5rem; }
-        .page-header { margin-bottom: 2rem; }
+        .page-header { margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: flex-end; }
         .page-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.25rem; }
         .page-description { color: var(--text-muted); font-size: 0.875rem; }
+
+        /* Advanced Search & Filter Bar */
+        .controls-bar { display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+        .search-input { flex: 1; min-width: 250px; padding: 0.625rem 1rem; border: 1px solid var(--border); border-radius: 6px; outline: none; font-size: 0.875rem; }
+        .search-input:focus { border-color: var(--primary); }
+        .filter-select { padding: 0.625rem 1rem; border: 1px solid var(--border); border-radius: 6px; outline: none; font-size: 0.875rem; min-width: 180px; background: white; }
 
         .table-card { background-color: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         table { width: 100%; border-collapse: collapse; text-align: left; }
@@ -33,18 +43,17 @@
         .department-tag { display: inline-flex; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; background-color: #e0e7ff; color: #3730a3; }
         .state-message { padding: 3rem; text-align: center; color: var(--text-muted); }
 
-        /* Action Buttons */
         .actions-cell { display: flex; gap: 0.75rem; }
-        .btn-icon { background: none; border: none; cursor: pointer; color: var(--text-muted); transition: 0.2s; display: flex; align-items: center; justify-content: center; padding: 0.25rem; border-radius: 4px; }
+        .btn-icon { background: none; border: none; cursor: pointer; color: var(--text-muted); transition: 0.2s; padding: 0.25rem; border-radius: 4px; }
         .btn-icon:hover { color: var(--primary); background-color: #e0e7ff; }
-        .btn-icon.delete:hover { color: var(--danger); background-color: #fee2e2; }
+        .btn-icon.delete-btn:hover { color: var(--danger); background-color: #fee2e2; }
 
         /* Modal Styles */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); display: none; justify-content: center; align-items: center; z-index: 50; backdrop-filter: blur(4px); }
         .modal-content { background: var(--surface); padding: 2rem; border-radius: 12px; width: 100%; max-width: 400px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
         .close-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-muted); }
-        .form-input { width: 100%; padding: 0.75rem; margin-bottom: 1rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.875rem; outline: none; }
+        .form-input { width: 100%; padding: 0.75rem; margin-bottom: 1rem; border: 1px solid var(--border); border-radius: 6px; outline: none; }
         .form-input:focus { border-color: var(--primary); }
     </style>
 </head>
@@ -62,9 +71,29 @@
 
     <main class="container">
         <header class="page-header">
-            <h1 class="page-title">Employee Directory</h1>
-            <p class="page-description">Manage your team members securely.</p>
+            <div>
+                <h1 class="page-title">Employee Directory</h1>
+                <p class="page-description">Manage your team members securely.</p>
+            </div>
+            <!-- Export Data Button -->
+            <button class="btn-success" id="export-btn" title="Download as CSV">
+                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                Export CSV
+            </button>
         </header>
+
+        <!-- Advanced Search and Filter -->
+        <div class="controls-bar">
+            <input type="text" id="search-input" class="search-input" placeholder="🔍 Search by employee name or email...">
+            <select id="filter-dept" class="filter-select">
+                <option value="All">All Departments</option>
+                <option value="IT">IT</option>
+                <option value="HR">HR</option>
+                <option value="Sales">Sales</option>
+                <option value="Finance">Finance</option>
+                <option value="Marketing">Marketing</option>
+            </select>
+        </div>
 
         <div class="table-card">
             <table>
@@ -86,6 +115,7 @@
 
     <!-- Modal Form -->
     <div id="modal-overlay" class="modal-overlay">
+        <!-- Form remains exactly the same as before -->
         <div class="modal-content">
             <div class="modal-header">
                 <h2 id="modal-title" style="font-size: 1.25rem;">Admin Access</h2>
@@ -96,7 +126,6 @@
                 <input type="email" id="login-email" class="form-input" placeholder="Admin Email" required>
                 <input type="password" id="login-password" class="form-input" placeholder="Password" required>
                 <button type="submit" class="btn-primary" style="width: 100%; justify-content: center;">Authenticate</button>
-                <p id="login-error" style="color: #dc2626; font-size: 0.8rem; margin-top: 10px; display: none;">Invalid credentials.</p>
             </form>
 
             <form id="employee-form" style="display: none;">
@@ -105,12 +134,13 @@
                 <input type="email" id="emp-email" class="form-input" placeholder="Work Email" required>
                 <input type="text" id="emp-phone" class="form-input" placeholder="Phone Number" required>
                 <input type="number" id="emp-age" class="form-input" placeholder="Age" required>
-                <input type="text" id="emp-dept" class="form-input" placeholder="Department" required>
+                <input type="text" id="emp-dept" class="form-input" placeholder="Department (e.g., IT, Sales)" required>
                 <button type="submit" class="btn-primary" style="width: 100%; justify-content: center;" id="submit-btn">Save Record</button>
             </form>
         </div>
     </div>
 
-    <script src="/script.js?v=3"></script>
+    <!-- CACHE BUSTING: Updated version to ?v=4 to force load new JS -->
+    <script src="/script.js?v=4"></script>
 </body>
 </html>
