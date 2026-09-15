@@ -3,53 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HR Dashboard - Enterprise API</title>
+    <title>HR Dashboard Pro - Enterprise API</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #eef2f5; padding: 20px; }
-        h1 { color: #2c3e50; text-align: center; margin-bottom: 30px; }
-        .dashboard-container { max-width: 800px; margin: 0 auto; }
-        .card { background: white; padding: 20px; margin-bottom: 15px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-left: 5px solid #3498db; transition: 0.3s; }
-        .card:hover { transform: translateY(-3px); box-shadow: 0 6px 12px rgba(0,0,0,0.1); }
-        .emp-name { font-size: 20px; font-weight: bold; color: #2980b9; margin-bottom: 8px; }
-        .emp-details { color: #555; font-size: 15px; display: flex; gap: 15px; flex-wrap: wrap; }
-        .badge { background: #ecf0f1; padding: 4px 10px; border-radius: 20px; font-size: 13px; font-weight: bold; color: #34495e; }
+        :root { --primary: #4f46e5; --bg: #f3f4f6; --card: #ffffff; --text: #1f2937; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 30px 20px; }
+        
+        .header { text-align: center; margin-bottom: 40px; }
+        .header h1 { color: var(--primary); font-size: 2.5rem; margin-bottom: 5px; }
+        .header p { color: #6b7280; font-size: 1.1rem; }
+        
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 25px; max-width: 1100px; margin: 0 auto; }
+        .card { background: var(--card); padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border-top: 5px solid var(--primary); transition: all 0.3s ease; }
+        .card:hover { transform: translateY(-8px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.15); }
+        
+        .name { font-size: 1.4rem; font-weight: bold; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .tag { background: #e0e7ff; color: var(--primary); padding: 5px 15px; border-radius: 20px; font-size: 0.9rem; font-weight: 600; }
+        .detail { margin: 10px 0; color: #4b5563; font-size: 1rem; display: flex; align-items: center; gap: 10px; }
+        
+        .loading-state { text-align: center; font-size: 1.2rem; color: #6b7280; margin-top: 50px; font-weight: 500; }
+        .error-state { color: #dc2626; text-align: center; grid-column: 1/-1; font-weight: 500; font-size: 1.1rem; }
     </style>
 </head>
 <body>
 
-    <div class="dashboard-container">
-        <h1>👥 Enterprise HR Dashboard</h1>
-        <!-- यहाँ JavaScript की मदद से हमारा डेटा आएगा -->
-        <div id="employee-list">
-            <p style="text-align: center; color: #7f8c8d;">Loading employee data securely from API...</p>
-        </div>
-    </div>
+    <header class="header">
+        <h1>🚀 HR Dashboard Pro</h1>
+        <p>Enterprise Employee Management System</p>
+    </header>
+
+    <!-- Initial Loading State -->
+    <div id="loading" class="loading-state">Loading employee data securely... ⏳</div>
+    
+    <!-- Data Container -->
+    <main id="employee-list" class="grid"></main>
 
     <script>
-        // आपकी API से डेटा Fetch करना
-        fetch('/api/employees')
-            .then(response => response.json())
-            .then(data => {
-                const list = document.getElementById('employee-list');
-                list.innerHTML = ''; // Loading मैसेज हटाएँ
+        /**
+         * Fetches employee data from the REST API and renders it to the DOM.
+         * Implements asynchronous fetching with standard error handling.
+         */
+        async function fetchAndRenderEmployees() {
+            const loadingElement = document.getElementById('loading');
+            const employeeListElement = document.getElementById('employee-list');
+
+            try {
+                const response = await fetch('/api/employees');
                 
-                data.data.forEach(emp => {
-                    list.innerHTML += `
-                        <div class="card">
-                            <div class="emp-name">👤 ${emp.name}</div>
-                            <div class="emp-details">
-                                <span class="badge">📧 ${emp.email}</span>
-                                <span class="badge">🏢 Dept: ${emp.department}</span>
-                                <span class="badge">🎂 Age: ${emp.age}</span>
-                                <span class="badge">📞 ${emp.phone}</span>
-                            </div>
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const result = await response.json();
+                
+                // Remove loading indicator
+                loadingElement.style.display = 'none';
+                
+                // Handle empty database scenario
+                if (!result.data || result.data.length === 0) {
+                    employeeListElement.innerHTML = '<p class="error-state">No employee records found in the database.</p>';
+                    return;
+                }
+
+                // Map data array to HTML strings and join them (Optimized DOM rendering)
+                const htmlContent = result.data.map(emp => `
+                    <article class="card">
+                        <div class="name">
+                            🧑‍💼 ${emp.name} 
+                            <span class="tag">${emp.department}</span>
                         </div>
-                    `;
-                });
-            })
-            .catch(err => {
-                document.getElementById('employee-list').innerHTML = '<p style="color:red; text-align:center;">Failed to load data.</p>';
-            });
+                        <div class="detail">📧 <b>Email:</b> ${emp.email}</div>
+                        <div class="detail">📞 <b>Phone:</b> ${emp.phone}</div>
+                        <div class="detail">🎂 <b>Age:</b> ${emp.age} Years</div>
+                    </article>
+                `).join('');
+
+                employeeListElement.innerHTML = htmlContent;
+
+            } catch (error) {
+                console.error("Data Fetching Error:", error);
+                loadingElement.style.display = 'none';
+                employeeListElement.innerHTML = '<p class="error-state">❌ Failed to load data. Please check your connection and refresh the page.</p>';
+            }
+        }
+
+        // Initialize the data fetch on document load for better performance
+        document.addEventListener('DOMContentLoaded', fetchAndRenderEmployees);
     </script>
 </body>
 </html>
