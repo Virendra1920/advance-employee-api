@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const jwt = require('jsonwebtoken');
 const { z } = require('zod');
 const mongoose = require('mongoose'); //
@@ -236,9 +237,8 @@ app.delete('/api/delete-employee/:id', verifyToken, async (req, res) => {
 // ----------------------------------------------------
 // 4. Default Route for Vercel (Homepage)
 // ----------------------------------------------------
-app.get('/', (req, res) => {
-  res.status(200).send("Welcome to Enterprise Employee API! The server is running perfectly on Vercel.");
-});
+// Serve the Frontend UI
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Start the Server (Local)
 const PORT = process.env.PORT || 3000;

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HR Dashboard - Enterprise API</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #eef2f5; padding: 20px; }
+        h1 { color: #2c3e50; text-align: center; margin-bottom: 30px; }
+        .dashboard-container { max-width: 800px; margin: 0 auto; }
+        .card { background: white; padding: 20px; margin-bottom: 15px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-left: 5px solid #3498db; transition: 0.3s; }
+        .card:hover { transform: translateY(-3px); box-shadow: 0 6px 12px rgba(0,0,0,0.1); }
+        .emp-name { font-size: 20px; font-weight: bold; color: #2980b9; margin-bottom: 8px; }
+        .emp-details { color: #555; font-size: 15px; display: flex; gap: 15px; flex-wrap: wrap; }
+        .badge { background: #ecf0f1; padding: 4px 10px; border-radius: 20px; font-size: 13px; font-weight: bold; color: #34495e; }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-container">
+        <h1>👥 Enterprise HR Dashboard</h1>
+        <!-- यहाँ JavaScript की मदद से हमारा डेटा आएगा -->
+        <div id="employee-list">
+            <p style="text-align: center; color: #7f8c8d;">Loading employee data securely from API...</p>
+        </div>
+    </div>
+
+    <script>
+        // आपकी API से डेटा Fetch करना
+        fetch('/api/employees')
+            .then(response => response.json())
+            .then(data => {
+                const list = document.getElementById('employee-list');
+                list.innerHTML = ''; // Loading मैसेज हटाएँ
+                
+                data.data.forEach(emp => {
+                    list.innerHTML += `
+                        <div class="card">
+                            <div class="emp-name">👤 ${emp.name}</div>
+                            <div class="emp-details">
+                                <span class="badge">📧 ${emp.email}</span>
+                                <span class="badge">🏢 Dept: ${emp.department}</span>
+                                <span class="badge">🎂 Age: ${emp.age}</span>
+                                <span class="badge">📞 ${emp.phone}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+            })
+            .catch(err => {
+                document.getElementById('employee-list').innerHTML = '<p style="color:red; text-align:center;">Failed to load data.</p>';
+            });
+    </script>
+</body>
+</html>
