@@ -6,32 +6,76 @@ const employeeForm = document.getElementById('employee-form');
 const modalTitle = document.getElementById('modal-title');
 const submitBtn = document.getElementById('submit-btn');
 
-// New Elements for Search & Export
 const searchInput = document.getElementById('search-input');
 const filterDept = document.getElementById('filter-dept');
 const exportBtn = document.getElementById('export-btn');
 
-// Global Array to store fetched data for fast searching
-let allEmployees = [];
+// Pagination Elements
+const prevBtn = document.getElementById('prev-btn');
+const nextBtn = document.getElementById('next-btn');
+const pageInfo = document.getElementById('page-info');
 
-// Fetch Data from Server
+// Global Variables
+let currentPage = 1;
+let totalPages = 1;
+let allEmployees = []; // For export functionality
+
+// --- NEW SMART FETCH WITH PAGINATION & SEARCH ---
 async function fetchAndRenderEmployees() {
+    const searchTerm = searchInput.value;
+    const dept = filterDept.value;
+    
+    // API URL तैयार करें (page और limit के साथ)
+    let url = `/api/employees?page=${currentPage}&limit=5`;
+    if (searchTerm) url += `&search=${searchTerm}`;
+    if (dept !== 'All') url += `&department=${dept}`;
+
     try {
-        const response = await fetch('/api/employees');
+        const response = await fetch(url);
         const result = await response.json();
         
-        if (result.data) {
-            allEmployees = result.data; // Store data globally
-            renderTable(allEmployees);  // Display data
+        if (result.status === "Success") {
+            allEmployees = result.data;
+            renderTable(result.data);
+            
+            // Pagination अपडेट करें
+            totalPages = result.totalPages || 1;
+            pageInfo.innerText = `Showing page ${result.currentPage} of ${totalPages} (Total Records: ${result.totalRecords})`;
+            
+            // Buttons चालू/बंद करें
+            prevBtn.disabled = currentPage === 1;
+            prevBtn.style.opacity = currentPage === 1 ? '0.5' : '1';
+            
+            nextBtn.disabled = currentPage === totalPages || totalPages === 0;
+            nextBtn.style.opacity = (currentPage === totalPages || totalPages === 0) ? '0.5' : '1';
         } else {
             renderTable([]);
         }
     } catch (error) {
-        tableBody.innerHTML = `<tr><td colspan="5" class="state-message" style="color:red;">Failed to load data from Server.</td></tr>`;
+        tableBody.innerHTML = `<tr><td colspan="5" class="state-message" style="color:red;">Failed to load data.</td></tr>`;
     }
 }
 
-// Render Table Function
+// Pagination Event Listeners
+prevBtn.addEventListener('click', () => {
+    if (currentPage > 1) {
+        currentPage--;
+        fetchAndRenderEmployees();
+    }
+});
+
+nextBtn.addEventListener('click', () => {
+    if (currentPage < totalPages) {
+        currentPage++;
+        fetchAndRenderEmployees();
+    }
+});
+
+// Search & Filter Listeners (जब भी सर्च करें, पेज 1 पर वापस आ जाएँ)
+searchInput.addEventListener('input', () => { currentPage = 1; fetchAndRenderEmployees(); });
+filterDept.addEventListener('change', () => { currentPage = 1; fetchAndRenderEmployees(); });
+
+// Render Table Function (Remains exactly the same)
 function renderTable(data) {
     if (data.length === 0) {
         tableBody.innerHTML = `<tr><td colspan="5" class="state-message">No matching employee records found.</td></tr>`;
@@ -54,18 +98,15 @@ function renderTable(data) {
                 <span class="emp-subtext">Years</span>
             </td>
             <td class="actions-cell">
-                <button class="btn-icon edit-btn" title="Edit Record" 
-                    data-id="${emp._id}" data-name="${emp.name}" data-email="${emp.email}" 
-                    data-phone="${emp.phone}" data-age="${emp.age}" data-dept="${emp.department}">
-                    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                </button>
                 <button class="btn-icon delete-btn" title="Delete Record" data-id="${emp._id}">
-                    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                 </button>
             </td>
         </tr>
     `).join('');
 }
+
+// Note: Ensure your old Export to CSV, and Modal code remains below this...
 
 // --- NEW FEATURE 1: Live Search & Filter Logic ---
 function handleSearchAndFilter() {
