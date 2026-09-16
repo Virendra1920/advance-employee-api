@@ -6,7 +6,8 @@ const dbSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true }, // unique: true prevents duplicate emails
   phone: { type: String, required: true },
   age: { type: Number, required: true },
-  department: { type: String, required: true }
+  department: { type: String, required: true },
+  isDeleted: { type: Boolean, default: false }
 }, { timestamps: true }); // Automatically adds 'createdAt' and 'updatedAt' fields
 
 const Employee = mongoose.model('Employee', dbSchema);

@@ -102,12 +102,13 @@ app.post('/api/add-employee', verifyToken, validateData(employeeSchema), async (
 });
 
 // ----------------------------------------------------
-// 2. GET API: Smart Search, Filtering & Pagination (NEW ADVANCED)
+// 2. GET API: Smart Search, Filtering & Pagination (NEW ADVANCED - With Soft Delete Filter)
 // ----------------------------------------------------
 app.get('/api/employees', async (req, res) => {
   try {
     const { department, search, page = 1, limit = 5 } = req.query;
-    let query = {};
+    // 👇 यहाँ हमने { isDeleted: false } जोड़ दिया है ताकि डिलीट किए हुए लोग न दिखें 👇
+    let query = { isDeleted: false }; 
 
     if (department) query.department = department;
     if (search) query.name = { $regex: search, $options: "i" }; 
@@ -209,7 +210,7 @@ app.put('/api/update-employee/:id', verifyToken, async (req, res) => {
 });
 
 // ----------------------------------------------------
-// 6. DELETE Employee (DELETE) - Senior Level Implementation
+// 6. DELETE Employee (DELETE) - Soft Delete Implementation
 // ----------------------------------------------------
 app.delete('/api/delete-employee/:id', verifyToken, async (req, res) => {
   try {
@@ -219,7 +220,12 @@ app.delete('/api/delete-employee/:id', verifyToken, async (req, res) => {
       return res.status(400).json({ status: "Error", message: "Invalid Employee ID format" });
     }
 
-    const deletedEmployee = await Employee.findByIdAndDelete(id);
+    // 👇 यहाँ हम डेटा उड़ाने की बजाय उसे अपडेट करके isDeleted: true कर रहे हैं 👇
+    const deletedEmployee = await Employee.findByIdAndUpdate(
+        id, 
+        { isDeleted: true }, 
+        { new: true }
+    );
 
     if (!deletedEmployee) {
       return res.status(404).json({ status: "Error", message: "Employee not found in Database" });
@@ -227,7 +233,7 @@ app.delete('/api/delete-employee/:id', verifyToken, async (req, res) => {
 
     res.status(200).json({
       status: "Success",
-      message: `Record for ${deletedEmployee.name} has been permanently deleted.`
+      message: `Record for ${deletedEmployee.name} has been moved to Trash (Soft Deleted).`
     });
   } catch (error) {
     res.status(500).json({ status: "Error", message: "Internal Server Error" });
