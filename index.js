@@ -107,8 +107,8 @@ app.post('/api/add-employee', verifyToken, validateData(employeeSchema), async (
 app.get('/api/employees', async (req, res) => {
   try {
     const { department, search, page = 1, limit = 5 } = req.query;
-    // 👇 यहाँ हमने { isDeleted: false } जोड़ दिया है ताकि डिलीट किए हुए लोग न दिखें 👇
-    let query = { isDeleted: false }; 
+    // 
+    let query = { isDeleted: { $ne: true } }; 
 
     if (department) query.department = department;
     if (search) query.name = { $regex: search, $options: "i" }; 
