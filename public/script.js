@@ -164,41 +164,52 @@ exportBtn.addEventListener('click', () => {
 // Event Delegation for Edit & Delete buttons (Remains exactly the same)
 tableBody.addEventListener('click', async (e) => {
     const editBtn = e.target.closest('.edit-btn');
+    const deleteBtn = e.target.closest('.delete-btn');
+
     if (editBtn) {
-        if (!localStorage.getItem('adminToken')) {
-            alert("Please login first by clicking 'Add Employee'");
-            return;
+        const id = editBtn.dataset.id;
+        const employee = allEmployees.find(emp => emp._id === id);
+
+        if (employee) {
+            document.getElementById('edit-emp-id').value = employee._id;
+            document.getElementById('emp-name').value = employee.name;
+            document.getElementById('emp-email').value = employee.email;
+            document.getElementById('emp-phone').value = employee.phone;
+            document.getElementById('emp-age').value = employee.age;
+            document.getElementById('emp-dept').value = employee.department;
+
+            modalTitle.innerText = 'Update Employee Data';
+            submitBtn.innerText = 'Update Record';
+            employeeForm.style.display = 'block';
+            loginForm.style.display = 'none';
+            modalOverlay.style.display = 'flex';
         }
-        modalOverlay.style.display = 'flex';
-        showEmployeeForm("Update Employee Data", "Update Record");
-        
-        document.getElementById('edit-emp-id').value = editBtn.dataset.id;
-        document.getElementById('emp-name').value = editBtn.dataset.name;
-        document.getElementById('emp-email').value = editBtn.dataset.email;
-        document.getElementById('emp-phone').value = editBtn.dataset.phone;
-        document.getElementById('emp-age').value = editBtn.dataset.age;
-        document.getElementById('emp-dept').value = editBtn.dataset.dept;
     }
 
-    const deleteBtn = e.target.closest('.delete-btn');
     if (deleteBtn) {
-        const token = localStorage.getItem('adminToken');
-        if (!token) {
-            alert("Admin Access Required. Please login first.");
-            return;
-        }
-        
         const id = deleteBtn.dataset.id;
-        if (confirm("Are you sure you want to permanently delete this record?")) {
+        if (confirm('Are you sure you want to move this record to trash?')) {
+            const token = localStorage.getItem('adminToken');
+            if (!token) {
+                alert('Session expired or unauthorized.');
+                return;
+            }
+
             try {
                 const response = await fetch(`/api/delete-employee/${id}`, {
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-
-                if (response.ok) fetchAndRenderEmployees();
-                else alert("Session expired or unauthorized.");
-            } catch (error) { console.error("Delete error", error); }
+                const result = await response.json();
+                
+                if (result.status === "Success") {
+                    fetchAndRenderEmployees();
+                } else {
+                    alert(result.message);
+                }
+            } catch (error) {
+                console.error('Delete error:', error);
+            }
         }
     }
 });
