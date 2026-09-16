@@ -1,43 +1,46 @@
-# 🚀 Enterprise Employee Management API
+# 🚀 Enterprise HR Dashboard Pro
 
-A production-ready RESTful API built to handle employee data securely and efficiently. This project demonstrates advanced backend architecture, MongoDB aggregation, strict data validation, JWT authentication, and robust security measures.
+A production-ready, full-stack Employee Management System designed with a focus on **Enterprise Security, Seamless UI/UX, and Advanced Data Handling**. Built on a serverless architecture using Node.js, Express, and MongoDB.
 
-## ✨ Enterprise Features
-- **Full CRUD Operations:** Create, Read, Update, and Delete employee records seamlessly.
-- **JWT Authentication:** Highly secure admin login system with token-based route protection.
-- **Advanced Security:** `Helmet.js` for secure headers and `Express Rate Limit` to prevent DDoS attacks.
-- **HR Analytics Dashboard:** Uses MongoDB Aggregation Pipeline for real-time department stats.
-- **Strict Data Validation:** Utilizes `Zod` to catch invalid data before database interaction.
-- **Serverless Deployment:** Fully deployed and running smoothly on **Vercel**.
+🔗 **[View Live Dashboard](https://your-vercel-project-link.vercel.app/)**  
+📖 **[View API Documentation](https://your-vercel-project-link.vercel.app/docs.html)**
 
-## 🛠️ Tech Stack
-- **Backend:** Node.js, Express.js
-- **Database:** MongoDB Atlas & Mongoose
-- **Security:** JSON Web Tokens (JWT), Helmet, Express-Rate-Limit
-- **Validation:** Zod
-- **Deployment:** Vercel
+---
 
-## 🔗 Live Demo
-**Base URL:** `https://advance-employee-api.vercel.app` *(API is currently live)*
+## ✨ Premium Features
 
-## 🚀 Core API Endpoints
+### 🛡️ Advanced Security & Authentication
+* **JWT (JSON Web Tokens):** Secure, token-based admin authentication for all write/update/delete operations.
+* **Helmet.js Integration:** Strict Content Security Policy (CSP) and HTTP header protection against XSS attacks.
+* **Zod Validation:** Bulletproof server-side schema validation to prevent bad data entry.
+* **MongoDB Unique Indexing:** Prevents duplicate employee records at the database level.
 
-### 🔐 Auth & Security
-| Method | Endpoint | Description | Access |
-| :--- | :--- | :--- | :--- |
-| `POST` | `/api/admin/login` | Admin login to generate JWT Token | Public |
+### 💻 Dynamic Frontend (Client-Side Rendering)
+* **Event Delegation:** CSP-compliant JavaScript architecture for secure DOM manipulation.
+* **Live Search & Filtering:** Instantly filter employee data by name, email, or department without page reloads.
+* **Asynchronous Fetch API:** Smooth CRUD operations (Create, Read, Update, Delete) via modal interfaces.
+* **Enterprise UI:** Clean, minimalist, and responsive data tables with SVG icons and Inter typography.
 
-### 👥 Employee Management
-| Method | Endpoint | Description | Access |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/api/employees` | Fetch all employees (Pagination & Search) | Public |
-| `GET` | `/api/employees/stats/hr-dashboard` | Get department-wise stats | Public |
-| `POST` | `/api/add-employee` | Add a new employee | **Protected** (Requires Token) |
-| `PUT` | `/api/update-employee/:id` | Update existing employee | **Protected** (Requires Token) |
-| `DELETE` | `/api/delete-employee/:id` | Remove an employee | **Protected** (Requires Token) |
+### 📊 Business Logic & Utility
+* **CSV Data Export:** Generate and download complete employee reports in `.csv` format instantly.
+* **Public API Docs:** Dedicated, color-coded API documentation page for seamless third-party integration.
 
-## 💻 How to Run Locally
-1. Clone this repository.
-2. Install dependencies: `npm install`
-3. Create a `.env` file and add your `MONGO_URI` and `JWT_SECRET`.
-4. Start the server: `node index.js`
+---
+
+## 🛠️ Technology Stack
+
+* **Frontend:** HTML5, CSS3 (Custom Variables), Vanilla JavaScript (ES6+)
+* **Backend:** Node.js, Express.js
+* **Database:** MongoDB Atlas (NoSQL)
+* **Security:** `jsonwebtoken`, `helmet`, `zod`, `cors`
+* **Deployment:** Vercel (Serverless Functions)
+
+---
+
+## 🚀 Run Locally
+
+Want to test this project on your local machine? Follow these simple steps:
+
+1. **Clone the repository:**
+   ```bash
+   git clone [https://github.com/your-username/your-repo-name.git](https://github.com/your-username/your-repo-name.git)
