@@ -5,6 +5,7 @@ const { z } = require('zod');
 const mongoose = require('mongoose'); //
 const connectDB = require('./db');
 const Employee = require('./employeeModel');
+const cors = require('cors');
 const { employeeSchema } = require('./validation');
 // Enterprise Level Validation for Update (Optional fields)
 const updateEmployeeSchema = z.object({
@@ -41,6 +42,7 @@ const storage = new CloudinaryStorage({
 const upload = multer({ storage: storage });
 
 const app = express();
+app.use(cors());
 app.use(express.json());
 // 1. Add Security Headers to hide backend architecture
 app.use(helmet());
