@@ -7,7 +7,8 @@ const dbSchema = new mongoose.Schema({
   phone: { type: String, required: true },
   age: { type: Number, required: true },
   department: { type: String, required: true },
-  isDeleted: { type: Boolean, default: false }
+  isDeleted: { type: Boolean, default: false },
+  profileImage: { type: String, default: "" }
 }, { timestamps: true }); // Automatically adds 'createdAt' and 'updatedAt' fields
 
 const Employee = mongoose.model('Employee', dbSchema);

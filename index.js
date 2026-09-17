@@ -18,6 +18,28 @@ const { validateData } = require('./middleware');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const multer = require('multer');
+
+// Configure Cloudinary using Environment Variables
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
+// Configure Multer Storage Engine for Cloudinary
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'employee_profiles',
+    allowed_formats: ['jpg', 'jpeg', 'png', 'webp']
+  }
+});
+
+const upload = multer({ storage: storage });
+
 const app = express();
 app.use(express.json());
 // 1. Add Security Headers to hide backend architecture
@@ -75,9 +97,9 @@ const verifyToken = (req, res, next) => {
 };
 
 // ----------------------------------------------------
-// 1. POST API: Add New Employee (Your existing code)
+// 1. POST API: Add New Employee (Updated for Image Upload)
 // ----------------------------------------------------
-app.post('/api/add-employee', verifyToken, validateData(employeeSchema), async (req, res) => {
+app.post('/api/add-employee', verifyToken, upload.single('profileImage'), async (req, res) => {
   try {
     const existingUser = await Employee.findOne({ email: req.body.email });
     if (existingUser) {
@@ -87,12 +109,23 @@ app.post('/api/add-employee', verifyToken, validateData(employeeSchema), async (
       });
     }
 
-    const newEmployee = new Employee(req.body);
+    const imageUrl = req.file ? req.file.path : "";
+
+    const employeeData = {
+        name: req.body.name,
+        email: req.body.email,
+        phone: req.body.phone,
+        age: Number(req.body.age),
+        department: req.body.department,
+        profileImage: imageUrl
+    };
+
+    const newEmployee = new Employee(employeeData);
     await newEmployee.save();
 
     res.status(201).json({
       status: "Success",
-      message: "Data successfully validated and permanently saved to database!",
+      message: "Employee and profile image successfully saved!",
       data: newEmployee
     });
 
