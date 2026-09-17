@@ -104,14 +104,15 @@
         <div class="table-card">
             <table>
                 <thead>
-                    <tr>
-                        <th>Employee Profile</th>
-                        <th>Contact Details</th>
-                        <th>Department</th>
-                        <th>Age</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
+        <tr>
+            <th>Profile</th>
+            <th>Employee Name</th>
+            <th>Contact Info</th>
+            <th>Department</th>
+            <th>Age</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
                 <tbody id="employee-list">
                     <tr><td colspan="5" class="state-message">Fetching secure data...</td></tr>
                 </tbody>
@@ -153,6 +154,10 @@
                 <input type="text" id="emp-phone" class="form-input" placeholder="Phone Number" required>
                 <input type="number" id="emp-age" class="form-input" placeholder="Age" required>
                 <input type="text" id="emp-dept" class="form-input" placeholder="Department (e.g., IT, Sales)" required>
+                <div class="form-group" style="margin-top: 15px;">
+        <label for="emp-image">Profile Photo (Optional)</label>
+        <input type="file" id="emp-image" accept="image/*" class="form-input" style="padding: 8px;">
+    </div>
                 <button type="submit" class="btn-primary" style="width: 100%; justify-content: center;" id="submit-btn">Save Record</button>
             </form>
         </div>

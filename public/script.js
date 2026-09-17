@@ -75,15 +75,23 @@ nextBtn.addEventListener('click', () => {
 searchInput.addEventListener('input', () => { currentPage = 1; fetchAndRenderEmployees(); });
 filterDept.addEventListener('change', () => { currentPage = 1; fetchAndRenderEmployees(); });
 
-// Render Table Function (Remains exactly the same)
+// Render Table with Profile Image
 function renderTable(data) {
     if (data.length === 0) {
-        tableBody.innerHTML = `<tr><td colspan="5" class="state-message">No matching employee records found.</td></tr>`;
+        // Changed colspan to 6 because we added the Profile column
+        tableBody.innerHTML = `<tr><td colspan="6" class="state-message">No matching employee records found.</td></tr>`;
         return;
     }
 
-    tableBody.innerHTML = data.map(emp => `
+    tableBody.innerHTML = data.map(emp => {
+        // Use uploaded image or a default avatar
+        const avatarUrl = emp.profileImage ? emp.profileImage : 'https://ui-avatars.com/api/?name=' + encodeURIComponent(emp.name) + '&background=random';
+
+        return `
         <tr>
+            <td>
+                <img src="${avatarUrl}" alt="Profile" style="width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 2px solid #e2e8f0;">
+            </td>
             <td>
                 <span class="emp-name">${emp.name}</span>
                 <span class="emp-subtext">ID: ${emp._id.substring(0, 8)}</span>
@@ -106,7 +114,7 @@ function renderTable(data) {
                 </button>
             </td>
         </tr>
-    `).join('');
+    `}).join('');
 }
 
 // Note: Ensure your old Export to CSV, and Modal code remains below this...
@@ -259,34 +267,79 @@ loginForm.addEventListener('submit', async (e) => {
     } catch (error) { console.error("Login Error", error); }
 });
 
+// Handle Form Submission (Create with Image & Update)
 employeeForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const token = localStorage.getItem('adminToken');
-    const empId = document.getElementById('edit-emp-id').value;
     
-    const payload = {
-        name: document.getElementById('emp-name').value,
-        email: document.getElementById('emp-email').value,
-        phone: document.getElementById('emp-phone').value,
-        age: Number(document.getElementById('emp-age').value),
-        department: document.getElementById('emp-dept').value
-    };
+    submitBtn.innerText = 'Processing...';
+    submitBtn.disabled = true;
 
-    const endpoint = empId ? `/api/update-employee/${empId}` : '/api/add-employee';
-    const method = empId ? 'PUT' : 'POST';
+    const isUpdate = document.getElementById('edit-emp-id').value !== '';
+    const empId = document.getElementById('edit-emp-id').value;
 
     try {
-        const response = await fetch(endpoint, {
-            method: method,
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-            body: JSON.stringify(payload)
-        });
+        let response;
 
-        if (response.ok) {
+        if (isUpdate) {
+            // Update existing employee (Send JSON)
+            const updateData = {
+                name: document.getElementById('emp-name').value,
+                email: document.getElementById('emp-email').value,
+                phone: document.getElementById('emp-phone').value,
+                age: Number(document.getElementById('emp-age').value),
+                department: document.getElementById('emp-dept').value
+            };
+
+            response = await fetch(`/api/update-employee/${empId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(updateData)
+            });
+        } else {
+            // Add new employee (Send FormData for Image Upload)
+            const formData = new FormData();
+            formData.append('name', document.getElementById('emp-name').value);
+            formData.append('email', document.getElementById('emp-email').value);
+            formData.append('phone', document.getElementById('emp-phone').value);
+            formData.append('age', document.getElementById('emp-age').value);
+            formData.append('department', document.getElementById('emp-dept').value);
+            
+            const imageFile = document.getElementById('emp-image').files[0];
+            if (imageFile) {
+                formData.append('profileImage', imageFile);
+            }
+
+            response = await fetch('/api/add-employee', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                    // Do not set Content-Type; browser handles it for FormData
+                },
+                body: formData
+            });
+        }
+
+        const result = await response.json();
+        
+        if (result.status === "Success") {
             modalOverlay.style.display = 'none';
+            employeeForm.reset();
+            document.getElementById('edit-emp-id').value = '';
+            document.getElementById('emp-image').value = ''; 
             fetchAndRenderEmployees();
-        } else alert("Operation failed. Check if email already exists or session expired.");
-    } catch (error) { console.error("Submission error", error); }
+        } else {
+            alert(result.message || 'Operation failed');
+        }
+    } catch (error) {
+        console.error('Submission error:', error);
+    } finally {
+        submitBtn.innerText = 'Save Record';
+        submitBtn.disabled = false;
+    }
 });
 
 // Initialize App
