@@ -71,16 +71,16 @@ connectDB();
 app.post('/api/admin/login', (req, res) => {
   const { email, password } = req.body;
   
-  // Portfolio के लिए हम एक फिक्स एडमिन ईमेल/पासवर्ड रख रहे हैं
+  // Portfolio
   if (email === "virendra@admin.com" && password === "admin123") {
-    // अगर ईमेल/पासवर्ड सही है, तो एक सीक्रेट टोकन बनाएँ (जो 1 घंटे तक चलेगा)
+  
     const token = jwt.sign({ role: "admin" }, process.env.JWT_SECRET, { expiresIn: '1h' });
     return res.status(200).json({ status: "Success", message: "Login successful!", token: token });
   }
   return res.status(401).json({ status: "Error", message: "Invalid Email or Password" });
 });
 
-// 2. Security Middleware (दरवाज़े का गार्ड)
+// 2. Security Middleware
 const verifyToken = (req, res, next) => {
   // हेडर से टोकन निकालें (Format: "Bearer <token>")
   const authHeader = req.headers['authorization'];
@@ -89,9 +89,9 @@ const verifyToken = (req, res, next) => {
   }
 
   try {
-    const token = authHeader.split(" ")[1]; // "Bearer " को हटाकर सिर्फ असली टोकन निकालें
+    const token = authHeader.split(" ")[1];
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded; // सब सही है, तो आगे जाने दें
+    req.user = decoded;
     next();
   } catch (err) {
     return res.status(401).json({ status: "Error", message: "Invalid or Expired Token!" });
@@ -255,7 +255,7 @@ app.delete('/api/delete-employee/:id', verifyToken, async (req, res) => {
       return res.status(400).json({ status: "Error", message: "Invalid Employee ID format" });
     }
 
-    // 👇 यहाँ हम डेटा उड़ाने की बजाय उसे अपडेट करके isDeleted: true कर रहे हैं 👇
+  
     const deletedEmployee = await Employee.findByIdAndUpdate(
         id, 
         { isDeleted: true }, 
